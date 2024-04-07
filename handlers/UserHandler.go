@@ -2,22 +2,24 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/FineiasAntonio/Toggers-API/models"
+	"github.com/FineiasAntonio/Toggers-API/repository"
+	"github.com/google/uuid"
 )
 
-var controle = 1
-
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	pessoa := models.User{
-		ID:       "kasd-21ma",
-		Username: "Teste",
-		Email:    "fieias9219@gmail.com",
+
+	users, err := repository.FindAll()
+
+	if err != nil {
+		log.Fatalln(err.Error())
 	}
 
-	json, err := json.Marshal(pessoa)
+	json, err := json.Marshal(users)
 
 	if err != nil {
 		log.Fatalln("Error while marshaling json data")
@@ -35,8 +37,15 @@ func RegisterNewUser(w http.ResponseWriter, r *http.Request) {
 	pessoa := models.User{}
 
 	json.NewDecoder(r.Body).Decode(&pessoa)
-	pessoa.ID = "uuid-temp"
+	pessoa.ID = uuid.New()
 
+	pessoa, err := repository.Create(&pessoa)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	fmt.Println(pessoa)
 	response, err := json.Marshal(pessoa)
 
 	if err != nil {
